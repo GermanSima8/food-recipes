@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:food_recipes/src/models/platillo_model.dart';
+import 'package:food_recipes/src/models/ingredientes_model.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -23,21 +24,49 @@ class DatabaseHelper {
       path,
       version: 1,
       onCreate: (db, version) {
-        return db.execute(
-          'CREATE TABLE platillos(id INTEGER PRIMARY KEY AUTOINCREMENT, nombre TEXT)',
-        );
+        // Crear la tabla platillos
+        db.execute('''
+          CREATE TABLE platillos(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nombre TEXT,
+            tiempoPreparacion INTEGER,
+            tipoComida TEXT,
+            pasos TEXT
+          )
+        ''');
+
+        // Crear la tabla ingredientes, relacionada con platillos
+        db.execute('''
+          CREATE TABLE ingredientes(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nombre TEXT,
+            cantidad TEXT,
+            platillo_id INTEGER,
+            FOREIGN KEY(platillo_id) REFERENCES platillos(id) ON DELETE CASCADE
+          )
+        ''');
       },
     );
   }
 
-  Future<void> insertPlatillo(Platillo platillo) async {
+  Future<int> insertPlatillo(Platillo platillo) async {
     final db = await database;
-    await db.insert(
+    return await db.insert(
       'platillos',
       platillo.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
+
+  Future<void> insertIngrediente(Ingrediente ingrediente) async {
+  final db = await database;
+  await db.insert(
+    'ingredientes',
+    ingrediente.toMap(),
+    conflictAlgorithm: ConflictAlgorithm.replace,
+  );
+}
+
 
   Future<List<Platillo>> getPlatillos() async {
     final db = await database;
@@ -46,6 +75,33 @@ class DatabaseHelper {
     return List.generate(maps.length, (i) {
       return Platillo.fromMap(maps[i]);
     });
+  }
+
+  Future<List<Ingrediente>> getIngredientes(int platilloId) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'ingredientes',
+      where: 'platillo_id = ?',
+      whereArgs: [platilloId],
+    );
+
+    return List.generate(maps.length, (i) {
+      return Ingrediente.fromMap(maps[i]);
+    });
+  }
+
+  Future<Platillo?> getPlatilloById(int id) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'platillos',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+    if (maps.isNotEmpty) {
+      return Platillo.fromMap(maps.first);
+    }
+    return null; // Retorna null si no se encuentra el platillo
   }
 
   Future<void> updatePlatillo(Platillo platillo) async {

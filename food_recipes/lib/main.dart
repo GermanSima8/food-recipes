@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:food_recipes/theme_data.dart';
 import 'package:food_recipes/src/screens/auth/login_screen.dart';
 import 'package:food_recipes/src/screens/home_screen.dart';
-import 'package:food_recipes/src/screens/recipe_details.dart';
 import 'package:food_recipes/src/screens/forms/recipe.dart';
 
 void main() {
@@ -25,7 +24,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const LoginScreen(),
         '/home': (context) => HomeScreen(),
-        '/favorite': (context) => const RecipeDetails(),
+        '/favorite': (context) =>  HomeScreen(),
         '/recipe-form': (context) =>   RecipeForm(),
       },
       
