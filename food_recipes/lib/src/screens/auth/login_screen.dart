@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:food_recipes/src/screens/home_screen.dart';
+
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -32,10 +32,7 @@ class LoginScreen extends StatelessWidget {
 
               ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const HomeScreen()),
-                  );
+                   Navigator.pushNamed(context, '/home');
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
