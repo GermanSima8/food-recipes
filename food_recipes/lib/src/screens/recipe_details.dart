@@ -7,7 +7,9 @@ class RecipeDetails extends StatefulWidget {
   final String nombre;
   final int platilloId; // ID del platillo para obtener los ingredientes
 
-  const RecipeDetails({Key? key, required this.nombre, required this.platilloId}) : super(key: key);
+  const RecipeDetails(
+      {Key? key, required this.nombre, required this.platilloId})
+      : super(key: key);
 
   @override
   State<RecipeDetails> createState() => _RecipeDetailsState();
@@ -27,11 +29,13 @@ class _RecipeDetailsState extends State<RecipeDetails> {
   }
 
   Future<void> _loadIngredientes() async {
-    List<Ingrediente> ingredientes = await _dbHelper.getIngredientes(widget.platilloId);
+    List<Ingrediente> ingredientes =
+        await _dbHelper.getIngredientes(widget.platilloId);
     if (ingredientes.isEmpty) {
-      print('No hay ingredientes para el platillo ID: ${widget.platilloId}'); // Debug
+      print('No hay ingredientes para el platillo ID: ${widget.platilloId}');
     } else {
-      print('Ingredientes cargados: ${ingredientes.map((i) => i.nombre).toList()}'); // Debug
+      print(
+          'Ingredientes cargados: ${ingredientes.map((i) => i.nombre).toList()}');
     }
     setState(() {
       _ingredientes = ingredientes;
@@ -40,45 +44,77 @@ class _RecipeDetailsState extends State<RecipeDetails> {
 
   Future<void> _loadPlatillo() async {
     // Cargar detalles del platillo
-    Platillo platillo = (await _dbHelper.getPlatillos()).firstWhere((platillo) => platillo.id == widget.platilloId);
+    Platillo platillo = (await _dbHelper.getPlatillos())
+        .firstWhere((platillo) => platillo.id == widget.platilloId);
     setState(() {
       _platillo = platillo;
     });
-    print('Platillo cargado: ${platillo.nombre}, Tiempo: ${platillo.tiempoPreparacion}, Tipo: ${platillo.tipoComida}, Pasos: ${platillo.pasos}'); // Debug
+    print(
+        'Platillo cargado: ${platillo.nombre}, Tiempo: ${platillo.tiempoPreparacion}, Tipo: ${platillo.tipoComida}, Pasos: ${platillo.pasos}'); // Debug
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Detalle"), // Mostrar el nombre de la receta
+        title: Text("Detalle de ${widget.nombre}"),
       ),
-      
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: _platillo == null // Verificar si el platillo se ha cargado
-            ? Center(child: CircularProgressIndicator()) // Cargar mientras se obtienen los datos
+            ? Center(child: CircularProgressIndicator())
             : Column(
                 children: [
-                  Text(_platillo!.nombre, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 36, color: Color.fromARGB(255, 118, 0, 0))),
+                  Text(
+                    _platillo!.nombre,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 36,
+                      color: Color.fromARGB(255, 118, 0, 0),
+                    ),
+                  ),
                   SizedBox(height: 20),
-                  Text('Tiempo de Preparación: ${_platillo!.tiempoPreparacion} minutos', style: TextStyle(fontSize: 20)),
-                  Text('Tipo de Comida: ${_platillo!.tipoComida}', style: TextStyle(fontSize: 20)),
+                  Text(
+                    'Tiempo de Preparación: ${_platillo!.tiempoPreparacion} minutos',
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  Text(
+                    'Tipo de Comida: ${_platillo!.tipoComida}',
+                    style: TextStyle(fontSize: 20),
+                  ),
                   SizedBox(height: 16),
-                  Text('Pasos:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25, color: Color.fromARGB(255, 53, 53, 53))),
+                  Text(
+                    'Pasos:',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 25,
+                      color: Color.fromARGB(255, 53, 53, 53),
+                    ),
+                  ),
                   Text(_platillo!.pasos, style: TextStyle(fontSize: 20)),
                   SizedBox(height: 20),
-                  Text('Ingredientes', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25, color: Color.fromARGB(255, 53, 53, 53))),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: _ingredientes.length,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          title: Text(_ingredientes[index].nombre),
-                          subtitle: Text('Cantidad: ${_ingredientes[index].cantidad}'),
-                        );
-                      },
+                  Text(
+                    'Ingredientes',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 25,
+                      color: Color.fromARGB(255, 53, 53, 53),
                     ),
+                  ),
+                  Expanded(
+                    child: _ingredientes.isEmpty // Verifica si hay ingredientes
+                        ? Center(
+                            child: Text('No hay ingredientes disponibles.'))
+                        : ListView.builder(
+                            itemCount: _ingredientes.length,
+                            itemBuilder: (context, index) {
+                              return ListTile(
+                                title: Text(_ingredientes[index].nombre),
+                                subtitle: Text(
+                                    'Cantidad: ${_ingredientes[index].cantidad}'),
+                              );
+                            },
+                          ),
                   ),
                 ],
               ),
