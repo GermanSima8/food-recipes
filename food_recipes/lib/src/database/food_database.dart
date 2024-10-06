@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:food_recipes/src/models/platillo_model.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -11,52 +13,55 @@ class DatabaseHelper {
 
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _initDatabase();
+    _database = await _initDB();
     return _database!;
   }
 
-  Future<Database> _initDatabase() async {
-    String path = join(await getDatabasesPath(), 'mi_base_de_datos.db');
+  Future<Database> _initDB() async {
+    String path = join(await getDatabasesPath(), 'platillos.db');
     return await openDatabase(
       path,
+      version: 1,
       onCreate: (db, version) {
         return db.execute(
-          'CREATE TABLE usuarios(id INTEGER PRIMARY KEY, nombre TEXT)',
+          'CREATE TABLE platillos(id INTEGER PRIMARY KEY AUTOINCREMENT, nombre TEXT)',
         );
       },
-      version: 1,
     );
   }
 
-  // Métodos CRUD
-  Future<void> insertUsuario(Map<String, dynamic> usuario) async {
+  Future<void> insertPlatillo(Platillo platillo) async {
     final db = await database;
     await db.insert(
-      'usuarios',
-      usuario,
+      'platillos',
+      platillo.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 
-  Future<List<Map<String, dynamic>>> getUsuarios() async {
+  Future<List<Platillo>> getPlatillos() async {
     final db = await database;
-    return await db.query('usuarios');
+    final List<Map<String, dynamic>> maps = await db.query('platillos');
+
+    return List.generate(maps.length, (i) {
+      return Platillo.fromMap(maps[i]);
+    });
   }
 
-  Future<void> updateUsuario(Map<String, dynamic> usuario) async {
+  Future<void> updatePlatillo(Platillo platillo) async {
     final db = await database;
     await db.update(
-      'usuarios',
-      usuario,
+      'platillos',
+      platillo.toMap(),
       where: 'id = ?',
-      whereArgs: [usuario['id']],
+      whereArgs: [platillo.id],
     );
   }
 
-  Future<void> deleteUsuario(int id) async {
+  Future<void> deletePlatillo(int id) async {
     final db = await database;
     await db.delete(
-      'usuarios',
+      'platillos',
       where: 'id = ?',
       whereArgs: [id],
     );
