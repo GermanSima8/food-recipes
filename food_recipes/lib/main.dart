@@ -3,6 +3,7 @@ import 'package:food_recipes/theme_data.dart';
 import 'package:food_recipes/src/screens/auth/login_screen.dart';
 import 'package:food_recipes/src/screens/home_screen.dart';
 import 'package:food_recipes/src/screens/forms/recipe.dart';
+import 'package:food_recipes/src/screens/favorit_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -24,7 +25,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const LoginScreen(),
         '/home': (context) => HomeScreen(),
-        '/favorite': (context) =>  HomeScreen(),
+        '/favorite': (context) =>   FavoritScreen(),
         '/recipe-form': (context) =>   RecipeForm(),
       },
       

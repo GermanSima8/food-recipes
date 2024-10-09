@@ -102,6 +102,12 @@ class _RecipeFormState extends State<RecipeForm> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Agregar Platillo'),
+         leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: const Icon(Icons.arrow_back_ios_new),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

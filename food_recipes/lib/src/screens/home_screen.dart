@@ -25,7 +25,8 @@ class _HomeScreenState extends State<HomeScreen> {
     List<Platillo> platillos = await _dbHelper.getPlatillos();
     setState(() {
       _platillos = platillos;
-    });
+      
+    },);
   }
 
   Future<void> _deletePlatillo(int id) async {
@@ -39,7 +40,6 @@ class _HomeScreenState extends State<HomeScreen> {
         platilloId); // Método que debes tener en tu DatabaseHelper para obtener ingredientes
   }
 
-  bool isFavorite = false;
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 itemCount: _platillos.length,
                 itemBuilder: (context, index) {
                   final platillo = _platillos[index];
+                  bool isFavorite = platillo.favorito;
                   return Card(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15.0),
@@ -104,25 +105,46 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ? Color.fromARGB(255, 156, 17, 7)
                                         : Colors.grey,
                                   ),
-                                  onPressed: () {
-                                    setState(() {
-                                      isFavorite = !isFavorite;
-                                    });
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          isFavorite
-                                              ? 'Añadido a favoritos'
-                                              : 'Eliminado de favoritos',
+                                  onPressed: () async {
+                                    try {
+                                      // Cambiar el estado de favorito en la base de datos
+                                      await DatabaseHelper()
+                                          .toggleFavorito(platillo.id!);
+
+                                      // Actualizar el estado local
+                                      setState(() {
+                                        isFavorite = !isFavorite;
+                                      });
+
+                                      // Mostrar un mensaje de feedback
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            isFavorite
+                                                ? 'Añadido a favoritos'
+                                                : 'Eliminado de favoritos',
+                                          ),
                                         ),
-                                      ),
-                                    );
+                                      );
+                                    } catch (e) {
+                                      // Manejar errores de base de datos
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                              'Error al actualizar favorito: $e'),
+                                        ),
+                                      );
+                                    }
                                   },
                                 ),
                                 SizedBox(width: 20),
                                 IconButton(
-                                  icon: Icon(Icons.delete,
-                                      color: Color.fromARGB(255, 62, 62, 62)),
+                                  icon: Icon(
+                                    Icons.delete,
+                                    color: Color.fromARGB(255, 62, 62, 62),
+                                  ),
                                   onPressed: () =>
                                       _deletePlatillo(platillo.id!),
                                 ),

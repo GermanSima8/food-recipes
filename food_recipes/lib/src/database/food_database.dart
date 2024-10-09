@@ -22,16 +22,17 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'platillos.db');
     return await openDatabase(
       path,
-      version: 1,
+      version: 3,
       onCreate: (db, version) {
-        // Crear la tabla platillos
+
         db.execute('''
           CREATE TABLE platillos(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nombre TEXT,
             tiempoPreparacion INTEGER,
             tipoComida TEXT,
-            pasos TEXT
+            pasos TEXT,
+            favorito INTEGER DEFAULT 0
           )
         ''');
 
@@ -59,14 +60,13 @@ class DatabaseHelper {
   }
 
   Future<void> insertIngrediente(Ingrediente ingrediente) async {
-  final db = await database;
-  await db.insert(
-    'ingredientes',
-    ingrediente.toMap(),
-    conflictAlgorithm: ConflictAlgorithm.replace,
-  );
-}
-
+    final db = await database;
+    await db.insert(
+      'ingredientes',
+      ingrediente.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
 
   Future<List<Platillo>> getPlatillos() async {
     final db = await database;
@@ -122,4 +122,39 @@ class DatabaseHelper {
       whereArgs: [id],
     );
   }
+
+  Future<List<Platillo>> getFavoritos() async {
+  final db = await database;
+  final List<Map<String, dynamic>> maps = await db.query(
+    'platillos',
+    where: 'favorito = ?',
+    whereArgs: [1], // Solo obtener los favoritos
+  );
+
+  return List.generate(maps.length, (i) {
+    return Platillo.fromMap(maps[i]);
+  });
+}
+
+
+Future<void> toggleFavorito(int id) async {
+  final db = await database;
+  
+  // Primero obtenemos el platillo actual
+  Platillo? platillo = await getPlatilloById(id);
+  
+  if (platillo != null) {
+    // Cambiamos el estado de 'favorito'
+    bool nuevoEstado = !platillo.favorito;
+    
+    // Actualizamos el platillo en la base de datos
+    await db.update(
+      'platillos',
+      platillo.copyWith(favorito: nuevoEstado).toMap(),
+      where: 'id = ?',
+      whereArgs: [platillo.id],
+    );
+  }
+}
+
 }
